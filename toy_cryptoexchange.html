@@ -1,0 +1,585 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>Криптобиржа</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <style>
+      body{
+        background-color: lightgrey;
+      }
+
+      .field{
+        background-color: #fff;
+      }
+
+      #game_board{
+        padding: 20px;
+        margin-top: 30px;
+        display : flex;
+        flex-direction: column;
+        justify-content : center;
+      }
+
+      #day-header span{
+        margin: 0 auto;
+      }
+
+      #chart_div{
+        display: block;
+        margin: 0 auto;
+      }
+
+      .card-with-info{
+        margin-left:0.5em;
+        margin-bottom:0.1em;
+        margin-top:0.1em;
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .card-content{
+        background-color:lightgray;
+        text-align:left;
+      }
+
+      .card-content .card-content-row{
+        margin:0.5em;
+      }
+
+      .card-content .input-group-prepend .input-group-text{
+        background-color: transparent;
+        color: #212529;
+        text-align: left;
+        padding-left: 0px;
+        width:110px;
+      }
+
+      .bitcoins-counter{
+        width: 50px;
+        border-style: inset;
+        border-width: 1px;
+        /*background-color: transparent;*/
+        height: 25px;
+        margin: 0.5rem 0.75rem 0.5rem 0.75rem;
+        padding: 2px;
+      }
+
+      .estimation{
+        width:100px;
+        height: 25px;
+        background-color: transparent;
+        margin: 0.5rem 0.75rem 0.5rem 0.75rem;
+      }
+
+      .card-content button{
+        background-color: #8a1908;
+        color: #fff;
+        height: 2.4rem;
+      }
+
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button {  
+
+        opacity: 1;
+
+      }
+    </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+    
+    function courseState(){
+      this.price_delta_min = 200;
+      this.price_delta_max = 700;
+      this.price_min = 0.1;
+
+      this.price = 7000;
+
+      this.courseInscreaseNews = [
+          "Астрологи объявили месяц Сетевого Червя. Курс повысился.",
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Курс вырос.",
+          "Известные медиаперсоны интересуются тойкоинами. Популярность криптовалюты растёт!",
+          "Фаза луны способствует высокопроизводительным вычислениям. Тойкоин вырос в цене.",
+          "Курс тойкоинов повысился! Вот просто вырос и всё!",
+          "Ходят слухи, что у владельцев тойкоинов Фотошоп работает быстрее. Тойкоин растёт в цене. ",
+          "Благотворительная акция собрала сотни тойкоинов для благотворительных фондов. Курс валюты растёт.",
+          "Говорят, Сатоши Накомото положительно отозвался об тойкоинах. Цена тойкоинов выросла.",
+          "В магазине расширений Гугл Хром появился специальный плагин-кошелёк для тойкоинов. Курс тойкоинов повысился.",
+          "Банда интернет-мошенников была выведена на чистую воду при помощи сделки в тойкоинах. Курс растёт.",
+         "Объявлен конкурс на лучший виртуальный дизайн для банкноты тойкоина. Тойкоины дорожают.", 
+          "Эксперты утверждают, что майнинг тойкоинов безвреден для жёстких дисков. Валюта растёт.", 
+          "Британские учёные обнаружили: майнинг тойкоинов улучшает функционирование компьютерной мыши. Курс повысился."
+      ];
+      
+      this.courseDecreaseNews = [
+          "Тойкоины или криптокотики, вот в чем вопрос. Курс понизился.",
+          "О боже, даже депутаты начали майнить тойкоины! Курс тойкоинов падает!",
+          "Курс тойкоинов стал снижаться после подорожания электроэнергии. Нет грабежу ЖКХ!",
+          "В сети был обнаружен новый опасный вирус TROJAN.WIN32.OneCoin. Тойкоины отреагировали снижением.",
+          "Работники заводов по производству видеокарт устроили забастовки против переработок. Курс тойкоина падает.",
+          "Известная (в узких кругах) группа хакеров была поймана на попытке нелегальной торговли тойкоинами. Валюта подешевела.",
+          "Внимание! В обращении были обнаружены фальшивые тойкоины! Остерегайтесь подделок! Курс падает.",
+          "Майнинг тойкоинов приводит к системным сбоям одной из версий Линукс Федоры. Цена валюты снижается.",
+          "Некоторые криптомайнеры недовольны появлением ещё одной криптовалюты. Ряд транзакций сорван, курс тойкоина падает.",
+          "Раскрыта продажа пиратского ПО за тойкоины. Цена на валюту упала.",
+          'Сингл "Mining Toy Coin" был освистан на концерете. Тойкоин подешевел.',
+          "Обнаружена уязвимость в алгортиме шифрования тойкоинов. Цена падает.",
+          "Билл Гейтс поморщился при вопросе об тойкоинах. Курс валюты снизился.",
+          "Крупный трейдер скинул на бирже весь свой запас тойкоинов. Цена упала." 
+      ];
+      
+      this.unusedInscreaseNews = this.courseInscreaseNews.slice(0);
+      this.unusedDecreaseNews = this.courseDecreaseNews.slice(0); 
+
+      this.getRandomBetween = function(min, max){
+        return Math.random() * (max - min) + min;
+      };
+
+      this.getPriceDelta = function(){
+        var price_delta = this.getRandomBetween(this.price_delta_min, this.price_delta_max);
+        price_delta_sign = Math.random() > 0.4 ? 1 : -1; 
+        price_delta = price_delta_sign * price_delta;
+        if (this.price + price_delta > this.price_min){
+          return price_delta;
+        }
+        else{
+          return this.price - this.price_min;
+        }
+      };
+
+      this.updatePrice = function(price_delta){
+        this.price += price_delta;
+      };
+
+      this.getRandomNews = function(inscreasing){
+          var newsSource = inscreasing ? this.unusedInscreaseNews : this.unusedDecreaseNews;
+          var index = Math.round(this.getRandomBetween(0, newsSource.length - 1));
+          var news = newsSource[index];
+          newsSource.splice(index, 1);
+          return news;
+      }
+    }
+
+    function walletState(){
+      this.dollars_start = 70000; 
+      this.dollars = this.dollars_start;
+      this.bitcoins = 0;
+    }
+
+    function gameState(){
+      this.wallet = new walletState();
+      this.course = new courseState();
+      this.course.updatePrice(this.course.getPriceDelta());
+      this.period = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+      this.day = this.period[0];
+
+      this.formatMoney = function(money){
+        var rounded = Math.abs(Math.round(money * 100) / 100);
+        var stringified = rounded.toString();
+        if (!stringified.indexOf(".") == -1){
+            stringified += ".00";
+        }
+
+        var digitsAfterDot = stringified.length - (stringified.indexOf(".") + 1);
+        if ( digitsAfterDot < 2)
+        {
+            stringified += "0".repeat( 2 - digitsAfterDot);
+        }
+
+        if (money < 0){
+            return "- $" + stringified;
+        }
+        else
+        {
+          return "$" + stringified;
+        }
+        
+      };
+
+      this.getMaxAvailableBitcoins = function(){
+          return Math.floor(this.wallet.dollars / this.course.price);
+      };
+
+      this.is_period_end = function(){
+        return this.day == this.period[this.period.length - 1];
+      }
+    }
+
+    var game = new gameState();
+      
+    function drawLineChart(with_animation, price_delta) {
+
+        if (!game.chart)
+        {
+            game.graphData = new google.visualization.DataTable();  
+            game.graphData.addColumn('number', 'X');
+            game.graphData.addColumn('number', 'Bitcoin');
+            game.chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        }
+        
+      game.graphData.addRow([game.day, game.course.price]);
+        
+      var options = {
+        height: 300,
+        width: 800,
+        hAxis: {
+          title: 'День',
+          ticks: game.period
+        },
+        vAxis: {
+          title: 'Цена тойкоина, $',
+          minValue : game.course.price_min,
+          maxValue : 11000
+        },
+        series: [ {visibleInLegend : false } ],
+        colors: ['#a52714']
+      };
+
+      options.title = "Курс тойкоина: " + game.formatMoney(game.course.price);
+
+      if (with_animation){
+          var animation_duration = 1000;
+
+          options.animation = {
+              duration: animation_duration,
+              easing: 'out',
+              startup: true
+          };
+          
+         $("#next").prop("disabled", true);
+
+        if (this.oldListener)
+        {
+          google.visualization.events.removeListener(this.oldListener);
+        }  
+
+        this.oldListener = google.visualization.events.addListener(game.chart, 'ready',
+              function() {
+                  setTimeout(function() 
+                  {
+                    if (!game.is_period_end()){
+                      start_day(price_delta);
+                    }
+                    else{
+                      $("#day").text(game.day);
+                      $("#news").text("Торговый период завершён.")
+                      $("#buy").hide();
+                      $("#sell").hide();
+
+                      $("#next").hide();
+                      $("#trade_end_col").show();
+                      $("#end_period_info").show();
+                    } 
+                  }, 
+                  animation_duration + 100);
+              });
+      }
+
+      game.chart.draw(game.graphData, options);
+    }
+
+    function next_day(){
+        game.day += 1;
+
+        var price_delta = game.course.getPriceDelta();
+        game.course.updatePrice(price_delta); 
+        
+        drawLineChart(true, price_delta);
+    }
+
+    function show_results(){
+        var total_sum = game.wallet.dollars + game.wallet.bitcoins * game.course.price;
+        $("#total_sum").text(game.formatMoney(total_sum));
+        $("#start_sum").text(game.formatMoney(game.wallet.dollars_start));  
+        var diff = total_sum - game.wallet.dollars_start;
+        if (diff >= 0.005){
+          $("#difference_caption").text("Удалось заработать: ");  
+        }
+        else{
+          $("#difference_caption").text("Потери составили: ");
+        }
+
+        $("#difference").text(game.formatMoney(diff));
+
+        $("#results").show();
+    }
+
+    function refresh_exchange(){
+        $("#dollars").text(game.formatMoney(game.wallet.dollars));
+        $("#bitcoins").text(game.wallet.bitcoins.toString());
+
+        $("#buy_bitcoins").val("0");
+        $("#estimated_cost").val("$0.00");
+        var max_buy = game.getMaxAvailableBitcoins();
+        $("#buy_bitcoins").attr("max", max_buy.toString());
+
+        $("#sell_bitcoins").val("0");
+        $("#estimated_gain").val("$0.00");
+        $("#sell_bitcoins").attr("max", game.wallet.bitcoins.toString());
+    }
+
+    function start_day(price_delta){
+        $("#day").text(game.day.toString());
+        if (price_delta > 0){
+            var news = game.course.getRandomNews(true);
+            $("#news").text(news);
+        }
+        else if (price_delta < 0){
+            var news = game.course.getRandomNews(false);
+            $("#news").text(news);
+        }
+        else if (game.day == 1)
+        {
+          $("#news").text("Начало торгового периода.");
+        }
+
+        refresh_exchange();
+
+        $("#next").prop("disabled", false);
+    }
+
+    $( document ).ready(function() {
+        $("#trade_end_col").hide();
+        $("#end_period_info").hide();
+        $("#results").hide();
+
+        $("#game_board").hide();
+        $("#rules").show();
+
+        $("#start_game_button").click(function() {
+            $("#rules").hide();
+            $("#game_board").show();
+
+            google.charts.load('current', {packages: ['corechart', 'line']});
+            google.charts.setOnLoadCallback(function() { drawLineChart(false); });
+        
+            start_day(0);
+        });
+
+        $(".number_input").keydown(function () {
+            // Save old value.
+            $(this).data("old", $(this).val());
+        });
+
+        $(".number_input").keyup(function () {
+            // Check correct, else revert back to old value.
+            var min = parseInt($(this).attr("min"));
+            var max = parseInt($(this).attr("max"));
+            var val = $(this).val();
+            if ( !val || (parseInt($(this).val()) <= max && parseInt($(this).val()) >= min))
+              ;
+            else
+              $(this).val($(this).data("old"));
+        });
+
+        $("#buy_bitcoins").bind('change mouseup', function() {
+            if (!this.value)
+            {
+              this.value = '0';
+            }
+
+            var amount = parseInt(this.value);
+            var estimated_cost = amount * game.course.price;
+            $("#estimated_cost").val(game.formatMoney(estimated_cost));
+        });
+
+        $("#sell_bitcoins").bind('change mouseup', function() {
+          if (!this.value)
+          {
+              this.value = '0';
+          }
+
+            var amount = parseInt(this.value);
+            var estimated_cost = amount * game.course.price;
+            $("#estimated_gain").val(game.formatMoney(estimated_cost));
+        });
+
+        $("#buy_button").click(function() {
+            var toBuy = parseFloat($("#buy_bitcoins").val());
+
+            if (toBuy > 0 && toBuy <= game.getMaxAvailableBitcoins()){
+                var spent = toBuy * game.course.price;
+                game.wallet.bitcoins += toBuy;
+                game.wallet.dollars -= spent;
+
+                refresh_exchange();
+            }
+        });
+
+        $("#sell_button").click(function() {
+            var toSell = parseFloat($("#sell_bitcoins").val());
+
+            if (toSell > 0 && toSell <= game.wallet.bitcoins ){
+                var gain = toSell * game.course.price;
+                game.wallet.dollars += gain;
+                game.wallet.bitcoins -= toSell;
+                
+                refresh_exchange();
+            }
+        });
+
+        $("#next").click(function() {
+          next_day();
+        });
+
+        $("#results_button").click(function() {
+          $("#end_period_info").hide();
+          show_results();
+        });
+
+        $("#one_more_button").click(function(){
+            $("#end_period_info").hide();
+            $("#results").hide();
+            $("#trade_end_col").hide();
+
+            $("#buy").show();
+            $("#sell").show();
+
+            $("#next").show();
+
+            game = new gameState();
+
+            google.charts.load('current', {packages: ['corechart', 'line']});
+            google.charts.setOnLoadCallback(drawLineChart);
+
+            start_day(0);
+        });
+    });
+    </script>
+  </head>
+  <body>
+    <div id="main_container" class="container" style="max-width:55rem">
+    <div id="rules" class="jumbotron field" style="padding-top: 1.5rem; padding-bottom: 1.5rem">
+        <p class="h1 text-secondary">Игрушечная криптобиржа</p>
+      <p>Биткоины и самые разные криптовалюты приобрели в последнее время огромную популярность. Кажется, их майнят все, кому не лень.
+        Но это не единственное, что можно делать c криптовалютами: ещё ими можно торговать на криптобиржах. 
+        И как на любых биржах, там можно как подзаработать, так и потерять.<br>
+        В этой простой игрушке можно почувствовать себя участником криптобиржи, который продаёт и покупает одну из криптовалют - тойкоин (toy coin),
+        пытаясь получить прибыль за счёт изменения её курсов.</p>
+      <hr class="my-4">
+      <p class="lead text-secondary"><b>Правила</b></p>
+      <p>В начале игры в кошельке у пользователя находится 70 000 долларов. В каждый из 
+      четырнадцати игровых дней курс тойкоина меняется случайным образом; он может как повышаться, так и понижаться.
+      В каждый из дней с первого по предпоследний игрок может купить тойкоинов, продать их или просто перейти к следующему дню. <br>
+      В последний день торгового периода все имеющиеся у игрока тойкоины конвертируются в доллары по курсу этого дня и складываются с 
+      долларовым остатком в кошельке. Разница между полученной суммой и суммой, имевшейся на начало игры, и есть выигрыш или проигрыш. <br><br>
+      Стоит учитывать, что поведение игрового курса лишь отдалённо имитирует изменение курсов реальных криптовалют, 
+       и оценить свою удачливость в качестве настоящего криптоигрока вряд ли получится. Хотя, как знать...
+      </p>
+      <div class="card-content" style="background-color:transparent">
+        <button id="start_game_button" class="btn">Начать игру</button>
+      </div>
+    </div>
+    <div id="game_board" class="row field">
+      <div id="day-header" class="row h3 text-muted">
+        <span>День <span id="day"></span></span>
+      </div>
+      <div class="row field text-muted" style="text-align: center;padding:0px;margin:0px;">
+        <span id="news" class="col" style="padding:0px;margin:0px;font-size:0.8em"></span>
+      </div>
+      <div class="row">
+          <div class="col">
+            </div>
+      <div id="chart_div" class="col">
+      </div>
+      <div class="col">
+        </div>
+    </div>
+      <div class="row">
+          <div class="col">
+              <div id="wallet_info" class="card card-with-info" style="max-width: 15rem;min-width: 15rem;">
+                  <div class="card-header bg-dark text-white" style="padding-left:10px;">Кошелёк</div>
+                  <div class="card-content">
+                    <div class="card-content-row">
+                      <span ><span class="card-title">Долларов: </span><span id="dollars" class="card-text"></span></span></div>
+                    <div class="card-content-row">
+                      <span><span class="card-title">Тойкоинов: </span><span id="bitcoins" class="card-text"></span></span></div>
+                  </div>
+              </div>
+            </div>
+            <div class="col" id="trade_end_col">
+              <div id="end_period_info" style="text-align:center">
+                <div>
+                  <span style="white-space: nowrap;font-size:1em;">Криптобиржа закрывается. <br>
+                    Вы можете продать оставшиеся тойкоины и перейти к результатам.</span>
+                </div>
+                <button id="results_button" class="btn bg-dark text-white" style="margin:10px;">Результаты</button>
+              </div>
+              <div id="results" class="card card-with-info" style="min-width: 25rem;">
+                <div class="card-header bg-dark text-white" style="padding-left:10px;">Результаты</div>
+                <div class="card-content">
+                    <div class="card-content-row">
+                        <span class="card-text">Общая сумма кошелька:&nbsp;</span><span id="total_sum"></span>
+                    </div>
+                    <div class="card-content-row">
+                        <span class="card-text">Сумма на начало игры:&nbsp;</span><span id="start_sum"></span>
+                    </div>
+                    <div class="card-content-row">
+                        <span class="card-text" id="difference_caption">Разница:&nbsp;</span><span id="difference"></span>
+                    </div>
+                </div>
+                <div class="card-content" style="padding-left:10px;padding-bottom: 10px;">
+                    <button id="one_more_button" class="btn">Сыграть ещё раз</button>
+                </div>
+              </div>
+              </div>
+          <div class="col">
+          <div id="buy" class="card card-with-info" style="max-width: 15rem; min-width: 15rem;">
+              <div class="card-header bg-dark text-white" style="padding-left:10px;">Купить тойкоинов</div>
+              <div class="card-content input-group" >
+                  <div class="input-group-prepend" style="padding-left:10px;">
+                      <span class="input-group-text" id="buy_amount_prepend" >Количество</span>
+                      <input type="number" value="0" id="buy_bitcoins"
+                         min="0" class="number_input form-control bitcoins-counter" aria-describedby="buy_amount_prepend" >
+                  </div>
+              </div>
+              <div class="card-content input-group" >
+                  <div class="input-group-prepend" style="padding-left:10px;">
+                       <span class="input-group-text" id="buy_cost_prepend" >Общаяя сумма</span>
+                      <input type="text" readonly="true" id="estimated_cost"
+                        aria-describedby="buy_cost_prepend" class="estimation" />
+                  </div>
+              </div>
+                  <div class="card-content" style="padding-left:10px;padding-bottom: 10px;">
+                      <button id="buy_button" type="button" class="btn">Купить</button>
+              </div>                 
+          </div>
+        </div>
+        <div class="col">
+          <div id="sell" class="card card-with-info" style="max-width: 15rem; min-width: 15rem;">
+              <div class="card-header bg-dark text-white" style="padding-left:10px;">Продать тойкоинов</div>
+              <div class="card-content input-group" >
+                  <div class="input-group-prepend" style="padding-left:10px;">
+                      <span class="input-group-text" id="sell_amount_prepend" >Количество</span>
+                      <input type="number" value="0" id="sell_bitcoins"
+                         min="0" class="number_input form-control bitcoins-counter" aria-describedby="sell_amount_prepend" >
+                  </div>
+              </div>
+              <div class="card-content input-group" >
+                  <div class="input-group-prepend" style="padding-left:10px;">
+                       <span class="input-group-text" id="sell_cost_prepend" >Общаяя сумма</span>
+                      <input type="text" readonly="true" id="estimated_gain"
+                        aria-describedby="sell_cost_prepend" class="estimation" />
+                  </div>
+                  <div class="card-content" style="padding-left:10px;padding-bottom: 10px;">
+                      <button id="sell_button" type="button" class="btn">Продать</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col" style="text-align: center; margin:15px;">
+          <button id="next" class="btn bg-dark text-white" >Следующий день</button>
+        </div>
+      </div>
+  </div>
+</div>
+  </body>
+</html>
